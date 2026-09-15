@@ -33,6 +33,16 @@ def test_request_requires_bytes_without_coercion() -> None:
         IngestionRequest(content="a\n1\n", limits=limits)
 
 
+def test_optional_worksheet_name_is_strict_and_bounded() -> None:
+    limits = ResourceLimits(max_source_bytes=10, max_rows=10, max_columns=10)
+    request = IngestionRequest(content=b"x", limits=limits, worksheet_name="A worksheet")
+    assert request.worksheet_name == "A worksheet"
+    with pytest.raises(ValidationError):
+        IngestionRequest(content=b"x", limits=limits, worksheet_name="")
+    with pytest.raises(ValidationError):
+        IngestionRequest(content=b"x", limits=limits, worksheet_name="x" * 32)
+
+
 def test_ingestion_timestamps_are_timezone_aware() -> None:
     from haralens.ingestion.models import IngestionMetadata, SourceType
 

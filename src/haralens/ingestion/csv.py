@@ -4,23 +4,24 @@ import csv
 import io
 import logging
 import time
-from collections import Counter
 from collections.abc import Iterator
 
 import pandas as pd
 
+from haralens.ingestion._shared import (
+    enforce_materialization_invariant,
+    enforce_source_size,
+    safe_display_name,
+    validate_text_columns,
+)
 from haralens.ingestion.errors import (
     ColumnLimitExceededError,
-    DuplicateColumnsError,
     EmptySourceError,
-    IngestionConsistencyError,
     IngestionError,
-    InvalidColumnNamesError,
     InvalidEncodingError,
     MalformedSourceError,
     NoDataRowsError,
     RowLimitExceededError,
-    SourceTooLargeError,
     UnsupportedSourceError,
 )
 from haralens.ingestion.models import (
@@ -31,13 +32,6 @@ from haralens.ingestion.models import (
 )
 
 _UTF8_BOM = b"\xef\xbb\xbf"
-
-
-def _safe_source_name(value: str) -> str:
-    """Return display-only basename metadata without interpreting it as a path."""
-    basename = value.replace("\\", "/").rsplit("/", 1)[-1]
-    printable = "".join(character if character.isprintable() else "_" for character in basename)
-    return (printable or "unnamed.csv")[:255]
 
 
 def _usable_rows(reader: Iterator[list[str]]) -> Iterator[list[str]]:
@@ -54,7 +48,7 @@ class CsvIngestionAdapter:
 
     def ingest(self, request: IngestionRequest) -> IngestionResult:
         started = time.perf_counter()
-        safe_name = _safe_source_name(request.source_name)
+        safe_name = safe_display_name(request.source_name, fallback="unnamed.csv")
         source_bytes = len(request.content)
         log_data: dict[str, object] = {
             "source_type": self.source_type.value,
@@ -106,10 +100,7 @@ class CsvIngestionAdapter:
 
     def _load(self, request: IngestionRequest) -> tuple[pd.DataFrame, str]:
         source_bytes = len(request.content)
-        if source_bytes > request.limits.max_source_bytes:
-            raise SourceTooLargeError(
-                actual_bytes=source_bytes, max_bytes=request.limits.max_source_bytes
-            )
+        enforce_source_size(request.content, maximum=request.limits.max_source_bytes)
         if source_bytes == 0:
             raise EmptySourceError("The CSV source is empty (zero bytes).")
 
@@ -144,16 +135,7 @@ class CsvIngestionAdapter:
                 observed_columns=column_count, max_columns=request.limits.max_columns
             )
 
-        counts = Counter(header)
-        duplicates = tuple(dict.fromkeys(name for name in header if counts[name] > 1))
-        if duplicates:
-            raise DuplicateColumnsError(duplicate_columns=duplicates)
-
-        invalid_positions = tuple(
-            position for position, name in enumerate(header, start=1) if not name.strip()
-        )
-        if invalid_positions:
-            raise InvalidColumnNamesError(column_positions=invalid_positions)
+        validate_text_columns(header)
 
         row_count = 0
         try:
@@ -180,19 +162,5 @@ class CsvIngestionAdapter:
         except (pd.errors.ParserError, ValueError) as error:
             raise MalformedSourceError("The CSV could not be parsed safely.") from error
 
-        actual_rows, actual_columns = table.shape
-        if actual_rows != row_count or actual_columns != column_count:
-            raise IngestionConsistencyError(
-                expected_rows=row_count,
-                actual_rows=actual_rows,
-                expected_columns=column_count,
-                actual_columns=actual_columns,
-            )
-        if list(table.columns) != header:
-            raise IngestionConsistencyError(
-                expected_rows=row_count,
-                actual_rows=actual_rows,
-                expected_columns=column_count,
-                actual_columns=actual_columns,
-            )
+        enforce_materialization_invariant(table, expected_rows=row_count, expected_columns=header)
         return table, encoding

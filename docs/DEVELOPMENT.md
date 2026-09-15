@@ -20,8 +20,9 @@ terminal when using this local Python installation. Both directories are ignored
 
 Optional: copy `.env.example` to `.env`. Valid environment values are development,
 test, production; log levels are DEBUG, INFO, WARNING, ERROR, CRITICAL. Invalid
-values and nonpositive ingestion limits fail validation. Default CSV limits are
-10 MiB, 100,000 data rows and 1,000 columns. Keep secrets out of source control.
+values and nonpositive ingestion limits fail validation. Common defaults are 10 MiB,
+100,000 data rows and 1,000 columns; XLSX and Parquet add the documented format-specific
+limits in [INGESTION.md](INGESTION.md). Keep secrets out of source control.
 
 ## Start
 
@@ -77,5 +78,5 @@ version and uv version, but not immutable digests; production hardening is defer
 Keep changes phase-scoped. Update tests and docs with behavior changes. Run every
 check before submitting. Do not add unused dependencies or fake analytical outputs.
 The full product specification describes the destination, not delivered features.
-CSV ingestion is a package API in Phase 1A; there is no upload UI or HTTP ingestion
-endpoint. See [INGESTION.md](INGESTION.md) for usage and policies.
+CSV, XLSX and Parquet ingestion are package APIs through Phase 1B; there is no upload UI
+or HTTP ingestion endpoint. See [INGESTION.md](INGESTION.md) for usage and policies.

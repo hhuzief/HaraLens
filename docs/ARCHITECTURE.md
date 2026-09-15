@@ -2,7 +2,7 @@
 
 ## Status and boundaries
 
-Phase 1A adds bounded CSV ingestion to the foundation. It is not a deployed
+Phase 1B adds bounded CSV, XLSX and Parquet ingestion to the foundation. It is not a deployed
 analytics service.
 
 ```text
@@ -11,7 +11,7 @@ apps/streamlit/app.py  (static presentation shell)
 apps/api/main.py → haralens.api (FastAPI composition and health router)
           ↓ future application services
 haralens.domain (immutable typed metadata and infrastructure Protocols)
-haralens.ingestion (typed contracts → bounded CSV adapter → pandas DataFrame)
+haralens.ingestion (typed contracts → bounded format adapters → pandas DataFrame)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```
@@ -39,13 +39,21 @@ There are no adapters or database migrations yet.
 Implement additional domain/result models alongside their actual use cases rather
 than freezing speculative schemas for the entire roadmap. The ingestion contract
 accepts caller-owned bytes and returns a pandas DataFrame with serializable metadata.
-Pandas is the sole Phase 1A table engine because it is mature, integrates directly
+Pandas remains the common table representation because it integrates directly
 with planned analytics, and avoids premature multi-engine complexity. The dependency
-is now explicit rather than relied on through Streamlit.
+is explicit rather than relied on through Streamlit. CSV uses the standard parser plus
+pandas, XLSX uses `openpyxl` with `defusedxml`, and Parquet uses PyArrow.
 
 The CSV adapter validates the byte limit before decoding, strictly decodes UTF-8,
 validates structure and hard row/column limits before constructing the DataFrame,
 and never truncates or skips malformed rows. See [ingestion](INGESTION.md).
+
+The binary adapters keep the same request/result/error vocabulary. An optional exact
+worksheet name is the only format-specific request field. Serializable metadata carries
+the selected worksheet for XLSX or schema/row-group information for Parquet. XLSX archive
+validation runs before lazy workbook parsing; Parquet footer metadata supplies dimensions
+before full table construction. Every adapter verifies the final DataFrame dimensions and
+column order against the format-specific validation result.
 
 ## Configuration and operation
 
@@ -75,15 +83,21 @@ needed until dependencies exist. Only this public, data-free API route exists.
 
 ## Validation
 
-Unit tests cover config validation, model invariants and JSON logging. API tests use
-FastAPI TestClient. Streamlit AppTest executes the page and a rerun. The smoke script
-starts real HTTP servers, polls their health routes, checks the served frontend,
-and always terminates its own processes. CI runs all checks plus container builds.
-Integration, security and performance test areas are reserved for real adapters and
-engines; there are no placeholder passing tests for unimplemented features.
+Unit tests cover config validation, model invariants, JSON logging, and all three
+ingestion adapters. In-memory workbook and Parquet fixtures exercise security and
+boundary cases without Microsoft Excel or network access. Bounded performance tests
+guard against catastrophic ingestion regressions. API tests use FastAPI TestClient.
+Streamlit AppTest executes the page and a rerun. The smoke script starts real HTTP
+servers, polls their health routes, checks the served frontend, and always terminates
+its own processes. CI runs all checks plus container builds.
 
 ## Official references consulted
 
 - [Streamlit navigation](https://docs.streamlit.io/develop/api-reference/navigation/st.navigation)
 - [FastAPI testing](https://fastapi.tiangolo.com/tutorial/testing/)
 - [uv Docker integration](https://docs.astral.sh/uv/guides/integration/docker/)
+- [openpyxl optimized read mode](https://openpyxl.readthedocs.io/en/stable/optimized.html)
+- [openpyxl formula and link loading options](https://openpyxl.readthedocs.io/en/stable/api/openpyxl.reader.excel.html)
+- [openpyxl XML security guidance](https://openpyxl.readthedocs.io/en/stable/#security)
+- [PyArrow ParquetFile metadata-first reader](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetFile.html)
+- [Python ZIP archive APIs](https://docs.python.org/3/library/zipfile.html)
