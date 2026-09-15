@@ -5,12 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "haralens"
 version = "0.1.0"
-description = "HaraLens data health platform — Phase 0 foundation"
+description = "HaraLens data health platform"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 license = "MIT"
 dependencies = [
   "fastapi>=0.115,<1",
+  "pandas>=3,<4",
   "pydantic>=2.10,<3",
   "pydantic-settings>=2.7,<3",
   "streamlit>=1.45,<2",
@@ -21,6 +22,7 @@ dependencies = [
 dev = [
   "httpx>=0.28,<1",
   "mypy>=1.15,<2",
+  "pandas-stubs>=3.0.5.260914",
   "pre-commit>=4,<5",
   "pytest>=8,<10",
   "pytest-cov>=6,<8",
@@ -36,7 +38,7 @@ addopts = "-ra --strict-markers --cov=haralens --cov-report=term-missing --cov-r
 
 [tool.coverage.run]
 branch = true
-omit = ["src/haralens/domain/ports.py"]
+omit = ["src/haralens/domain/ports.py", "src/haralens/ingestion/contracts.py"]
 
 [tool.ruff]
 target-version = "py312"
@@ -52,4 +54,3 @@ select = ["E", "F", "I", "UP", "B", "S"]
 python_version = "3.12"
 strict = true
 files = ["src", "apps"]
-

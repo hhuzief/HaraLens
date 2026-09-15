@@ -2,7 +2,8 @@
 
 ## Status and boundaries
 
-Phase 0 is a foundation, not a deployed analytics service.
+Phase 1A adds bounded CSV ingestion to the foundation. It is not a deployed
+analytics service.
 
 ```text
 apps/streamlit/app.py  (static presentation shell)
@@ -10,6 +11,7 @@ apps/streamlit/app.py  (static presentation shell)
 apps/api/main.py → haralens.api (FastAPI composition and health router)
           ↓ future application services
 haralens.domain (immutable typed metadata and infrastructure Protocols)
+haralens.ingestion (typed contracts → bounded CSV adapter → pandas DataFrame)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```
@@ -35,15 +37,20 @@ ownership. These contracts do not provide working authentication or authorizatio
 There are no adapters or database migrations yet.
 
 Implement additional domain/result models alongside their actual use cases rather
-than freezing speculative schemas for the entire roadmap. Phase 1 will introduce
-resource-aware ingestion and structured profiling/check/score result interfaces
-before implementing engines. No dataframe library is directly required by the core;
-Streamlit may bring one transitively.
+than freezing speculative schemas for the entire roadmap. The ingestion contract
+accepts caller-owned bytes and returns a pandas DataFrame with serializable metadata.
+Pandas is the sole Phase 1A table engine because it is mature, integrates directly
+with planned analytics, and avoids premature multi-engine complexity. The dependency
+is now explicit rather than relied on through Streamlit.
+
+The CSV adapter validates the byte limit before decoding, strictly decodes UTF-8,
+validates structure and hard row/column limits before constructing the DataFrame,
+and never truncates or skips malformed rows. See [ingestion](INGESTION.md).
 
 ## Configuration and operation
 
 Settings load defaults, optional `.env`, then `HARALENS_` environment overrides.
-Only environment and log level are configured now; no placeholder credentials.
+Environment, log level and ingestion hard limits are configured; no placeholder credentials.
 Settings are created at the composition root rather than as a global singleton.
 Logging starts in FastAPI lifespan; imports do not configure root logging.
 Application logs are UTC JSON events. Third-party server logs keep their own format.

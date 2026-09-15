@@ -3,18 +3,21 @@
 import json
 import logging
 from datetime import UTC, datetime
+from typing import cast
 
 
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
-        return json.dumps(
-            {
-                "timestamp": datetime.now(UTC).isoformat(),
-                "level": record.levelname,
-                "logger": record.name,
-                "event": record.getMessage(),
-            }
-        )
+        payload: dict[str, object] = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "event": record.getMessage(),
+        }
+        event_data = getattr(record, "event_data", None)
+        if isinstance(event_data, dict):
+            payload.update(cast(dict[str, object], event_data))
+        return json.dumps(payload)
 
 
 def configure_logging(level: str) -> None:
