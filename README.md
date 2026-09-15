@@ -1,2 +1,63 @@
-# HaraLens
-Huzora is an intelligent data quality, advanced analytics, and ML-readiness platform that profiles datasets, detects quality issues and anomalies, generates actionable insights, and helps teams build more trustworthy analytics and machine-learning workflows.
+﻿# HaraLens
+
+Intelligent Data Health, Analytics & ML Readiness Platform.
+
+Understand, validate and improve your data before trusting the decisions or models
+built from it. **Only Phase 0 is implemented.**
+
+| Capability | Status |
+| --- | --- |
+| Package, configuration, JSON application logging | Implemented |
+| Typed metadata models and infrastructure contracts | Implemented |
+| FastAPI liveness endpoint and minimal Streamlit shell | Implemented |
+| Tests, checks, CI definition, Docker foundations | Implemented |
+| Ingestion, profiling, quality, scoring and recommendations | Planned — Phase 1 |
+| Authentication, persistence, advanced analytics, ML and AI | Planned |
+
+## Quick start
+
+Install uv, then run from the repository root:
+
+```powershell
+uv sync --locked
+uv run --locked uvicorn apps.api.main:app --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+In another terminal:
+
+```powershell
+uv run --locked streamlit run apps/streamlit/app.py --server.address=127.0.0.1 --server.headless=true --browser.gatherUsageStats=false
+```
+
+Open http://127.0.0.1:8501. Health: http://127.0.0.1:8000/api/v1/health.
+OpenAPI documentation: http://127.0.0.1:8000/docs.
+No database, account, paid API, or Ollama instance is required.
+
+## Verification
+
+```powershell
+uv run --locked pytest
+uv run --locked ruff check .
+uv run --locked ruff format --check .
+uv run --locked mypy
+uv run --locked python scripts/smoke.py
+```
+
+See [development instructions](docs/DEVELOPMENT.md) for local cache settings,
+containers, configuration, and pre-commit setup.
+
+## Architecture and scope
+
+Streamlit → FastAPI → application services → engines → storage adapters.
+Phase 0 provides the two entry points and domain boundaries. The static UI does
+not yet call the backend. No uploads, analysis, authentication or persistence exist.
+
+- [Product specification](docs/PRODUCT_SPEC.md): full future scope, not current features.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Proposed scoring methodology](docs/SCORING_METHODOLOGY.md)
+- [Phase 0 verification report](docs/PHASE_0_REPORT.md)
+- [Security](SECURITY.md)
+
+MIT licensed. Docker foundations need Docker Engine to build and run; local
+verification limitations are recorded in the Phase 0 report.

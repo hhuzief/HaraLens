@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# HaraLens local tooling and private runtime files
+.uv-cache/
+.uv-python/
+.smoke/
+.env.*
+!.env.example
