@@ -2,8 +2,8 @@
 
 ## Status and boundaries
 
-Phase 1B adds bounded CSV, XLSX and Parquet ingestion to the foundation. It is not a deployed
-analytics service.
+Phase 1C adds deterministic semantic type inference after bounded ingestion. It remains a
+reusable engine rather than a deployed analytics service.
 
 ```text
 apps/streamlit/app.py  (static presentation shell)
@@ -12,6 +12,7 @@ apps/api/main.py → haralens.api (FastAPI composition and health router)
           ↓ future application services
 haralens.domain (immutable typed metadata and infrastructure Protocols)
 haralens.ingestion (typed contracts → bounded format adapters → pandas DataFrame)
+haralens.semantic (physical dtype + explainable rules → versioned semantic profile)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```
@@ -55,10 +56,20 @@ validation runs before lazy workbook parsing; Parquet footer metadata supplies d
 before full table construction. Every adapter verifies the final DataFrame dimensions and
 column order against the format-specific validation result.
 
+`haralens.semantic` accepts either that ingestion result or a caller-owned pandas DataFrame.
+It computes exact non-null and uniqueness metrics, uses bounded deterministic content
+inspection, and returns immutable Pydantic results with separate physical and semantic types,
+evidence codes, confidence, warnings, alternatives, and an override extension point. The
+dataset service isolates a pathological column as `unknown` so later columns still run.
+Inference imports neither presentation framework and does not perform broader profiling.
+See [semantic inference](SEMANTIC_INFERENCE.md).
+
 ## Configuration and operation
 
 Settings load defaults, optional `.env`, then `HARALENS_` environment overrides.
 Environment, log level and ingestion hard limits are configured; no placeholder credentials.
+Semantic thresholds live in the strict, immutable `SemanticInferenceConfig` passed directly
+to the reusable service, so identical table/configuration/version inputs remain reproducible.
 Settings are created at the composition root rather than as a global singleton.
 Logging starts in FastAPI lifespan; imports do not configure root logging.
 Application logs are UTC JSON events. Third-party server logs keep their own format.
@@ -83,8 +94,10 @@ needed until dependencies exist. Only this public, data-free API route exists.
 
 ## Validation
 
-Unit tests cover config validation, model invariants, JSON logging, and all three
-ingestion adapters. In-memory workbook and Parquet fixtures exercise security and
+Unit tests cover config validation, model invariants, JSON logging, all three ingestion
+adapters, and the semantic rule engine. Golden business tables, conflict cases, threshold
+boundaries, serialization, deterministic sampling, immutability, and failure isolation test
+the semantic contract. In-memory workbook and Parquet fixtures exercise security and
 boundary cases without Microsoft Excel or network access. Bounded performance tests
 guard against catastrophic ingestion regressions. API tests use FastAPI TestClient.
 Streamlit AppTest executes the page and a rerun. The smoke script starts real HTTP

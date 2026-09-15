@@ -3,7 +3,7 @@
 Intelligent Data Health, Analytics & ML Readiness Platform.
 
 Understand, validate and improve your data before trusting the decisions or models
-built from it. **Phase 1B bounded CSV, XLSX and Parquet ingestion is implemented.**
+built from it. **Phase 1C deterministic semantic type inference is implemented.**
 
 | Capability | Status |
 | --- | --- |
@@ -13,7 +13,8 @@ built from it. **Phase 1B bounded CSV, XLSX and Parquet ingestion is implemented
 | Tests, checks, CI definition, Docker foundations | Implemented |
 | Bounded UTF-8 CSV ingestion through a reusable contract | Implemented — Phase 1A |
 | Bounded macro-free XLSX and flat Parquet ingestion | Implemented — Phase 1B |
-| Semantic type inference, profiling, quality, scoring and recommendations | Planned |
+| Explainable semantic type inference | Implemented — Phase 1C |
+| Profiling, quality, scoring and recommendations | Planned |
 | Authentication, persistence, advanced analytics, ML and AI | Planned |
 
 ## Quick start
@@ -57,11 +58,13 @@ not yet call the backend. No uploads, analysis, authentication or persistence ex
 - [Product specification](docs/PRODUCT_SPEC.md): full future scope, not current features.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Bounded ingestion](docs/INGESTION.md)
+- [Semantic type inference](docs/SEMANTIC_INFERENCE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Proposed scoring methodology](docs/SCORING_METHODOLOGY.md)
 - [Phase 0 verification report](docs/PHASE_0_REPORT.md)
 - [Phase 1A verification report](docs/PHASE_1A_REPORT.md)
 - [Phase 1B verification report](docs/PHASE_1B_REPORT.md)
+- [Phase 1C verification report](docs/PHASE_1C_REPORT.md)
 - [Security](SECURITY.md)
 
 MIT licensed. Docker foundations need Docker Engine to build and run; local
