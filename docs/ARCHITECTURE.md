@@ -2,8 +2,8 @@
 
 ## Status and boundaries
 
-Phase 1C adds deterministic semantic type inference after bounded ingestion. It remains a
-reusable engine rather than a deployed analytics service.
+Phase 1D adds deterministic descriptive profiling after bounded ingestion and semantic type
+inference. It remains a reusable engine rather than a deployed analytics service.
 
 ```text
 apps/streamlit/app.py  (static presentation shell)
@@ -13,6 +13,7 @@ apps/api/main.py → haralens.api (FastAPI composition and health router)
 haralens.domain (immutable typed metadata and infrastructure Protocols)
 haralens.ingestion (typed contracts → bounded format adapters → pandas DataFrame)
 haralens.semantic (physical dtype + explainable rules → versioned semantic profile)
+haralens.profiling (table + semantic profile → versioned descriptive profile)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```
@@ -64,12 +65,22 @@ dataset service isolates a pathological column as `unknown` so later columns sti
 Inference imports neither presentation framework and does not perform broader profiling.
 See [semantic inference](SEMANTIC_INFERENCE.md).
 
+`haralens.profiling` accepts the same table plus its matching semantic profile. It validates
+shape, column identity, dtype, null counts, and cardinality before computing exact bounded
+dataset and column descriptions. Immutable result models separate common facts from numeric,
+categorical/Boolean, datetime, and text/identifier statistics. Ambiguous datetimes remain
+unresolved; infinities are counted outside finite aggregates; identifier and free-text raw
+values are not retained. Operational failures use typed warnings and do not become data-
+quality judgments. See [profiling](PROFILING.md).
+
 ## Configuration and operation
 
 Settings load defaults, optional `.env`, then `HARALENS_` environment overrides.
 Environment, log level and ingestion hard limits are configured; no placeholder credentials.
 Semantic thresholds live in the strict, immutable `SemanticInferenceConfig` passed directly
 to the reusable service, so identical table/configuration/version inputs remain reproducible.
+Profiling resource limits and statistical conventions live in the strict, immutable
+`ProfilingConfig`; the complete configuration and both engine versions accompany each result.
 Settings are created at the composition root rather than as a global singleton.
 Logging starts in FastAPI lifespan; imports do not configure root logging.
 Application logs are UTC JSON events. Third-party server logs keep their own format.
@@ -95,9 +106,10 @@ needed until dependencies exist. Only this public, data-free API route exists.
 ## Validation
 
 Unit tests cover config validation, model invariants, JSON logging, all three ingestion
-adapters, and the semantic rule engine. Golden business tables, conflict cases, threshold
-boundaries, serialization, deterministic sampling, immutability, and failure isolation test
-the semantic contract. In-memory workbook and Parquet fixtures exercise security and
+adapters, the semantic rule engine, and exact profiling. Golden business tables, conflict
+cases, threshold boundaries, serialization, deterministic sampling, immutability, numerical
+edge cases, datetime ambiguity, and failure isolation test the semantic and profiling
+contracts. In-memory workbook and Parquet fixtures exercise security and
 boundary cases without Microsoft Excel or network access. Bounded performance tests
 guard against catastrophic ingestion regressions. API tests use FastAPI TestClient.
 Streamlit AppTest executes the page and a rerun. The smoke script starts real HTTP

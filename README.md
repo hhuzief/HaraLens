@@ -3,7 +3,7 @@
 Intelligent Data Health, Analytics & ML Readiness Platform.
 
 Understand, validate and improve your data before trusting the decisions or models
-built from it. **Phase 1C deterministic semantic type inference is implemented.**
+built from it. **Phase 1D deterministic dataset and column profiling is implemented.**
 
 | Capability | Status |
 | --- | --- |
@@ -14,7 +14,8 @@ built from it. **Phase 1C deterministic semantic type inference is implemented.*
 | Bounded UTF-8 CSV ingestion through a reusable contract | Implemented — Phase 1A |
 | Bounded macro-free XLSX and flat Parquet ingestion | Implemented — Phase 1B |
 | Explainable semantic type inference | Implemented — Phase 1C |
-| Profiling, quality, scoring and recommendations | Planned |
+| Semantic-aware dataset and column profiling | Implemented — Phase 1D |
+| Quality, scoring and recommendations | Planned |
 | Authentication, persistence, advanced analytics, ML and AI | Planned |
 
 ## Quick start
@@ -59,12 +60,15 @@ not yet call the backend. No uploads, analysis, authentication or persistence ex
 - [Architecture](docs/ARCHITECTURE.md)
 - [Bounded ingestion](docs/INGESTION.md)
 - [Semantic type inference](docs/SEMANTIC_INFERENCE.md)
+- [Dataset and column profiling](docs/PROFILING.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Proposed scoring methodology](docs/SCORING_METHODOLOGY.md)
 - [Phase 0 verification report](docs/PHASE_0_REPORT.md)
 - [Phase 1A verification report](docs/PHASE_1A_REPORT.md)
 - [Phase 1B verification report](docs/PHASE_1B_REPORT.md)
 - [Phase 1C verification report](docs/PHASE_1C_REPORT.md)
+- [Phase 1D verification report](docs/PHASE_1D_REPORT.md)
+- [Phase 1D pre-freeze profiling audit](docs/PHASE_1D_PRE_FREEZE_AUDIT.md)
 - [Security](SECURITY.md)
 
 MIT licensed. Docker foundations need Docker Engine to build and run; local

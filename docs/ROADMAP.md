@@ -1,6 +1,6 @@
 ﻿# Roadmap
 
-Phase 1C is the latest completed slice. Later phases remain planned.
+Phase 1D is the latest completed slice. Later phases remain planned.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -8,7 +8,7 @@ Phase 1C is the latest completed slice. Later phases remain planned.
 | 1A | Ingestion contract and bounded CSV loading | Implemented; see verification report |
 | 1B | Bounded Excel and Parquet ingestion | Implemented; see verification report |
 | 1C | Explainable semantic type inference | Implemented; see verification report |
-| 1D | Dataset and column profiling | Planned |
+| 1D | Dataset and column profiling | Implemented; see verification report |
 | 1E+ | Quality, scoring and recommendations | Planned |
 | 2 | Professional Streamlit workflows | Planned |
 | 3 | Authentication and SaaS persistence | Planned |
@@ -23,5 +23,5 @@ Phase 1C is the latest completed slice. Later phases remain planned.
 | 12 | Advanced analytical modules | Planned |
 | 13 | Production hardening | Planned |
 
-Next task, only after authorization: Phase 1D — dataset and column profiling. The remaining
-engines follow incrementally.
+Next task, only after authorization: Phase 1E — quality checks. The remaining engines follow
+incrementally.
