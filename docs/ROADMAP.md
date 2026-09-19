@@ -1,6 +1,6 @@
 ﻿# Roadmap
 
-Phase 1D is the latest completed slice. Later phases remain planned.
+Phase 1E is the latest completed slice. Later phases remain planned.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -9,7 +9,9 @@ Phase 1D is the latest completed slice. Later phases remain planned.
 | 1B | Bounded Excel and Parquet ingestion | Implemented; see verification report |
 | 1C | Explainable semantic type inference | Implemented; see verification report |
 | 1D | Dataset and column profiling | Implemented; see verification report |
-| 1E+ | Quality, scoring and recommendations | Planned |
+| 1E | Typed data-quality check framework | Implemented; see verification report |
+| 1F | Production data-quality check catalogue | Planned |
+| 1G+ | Scoring and later quality capabilities | Planned |
 | 2 | Professional Streamlit workflows | Planned |
 | 3 | Authentication and SaaS persistence | Planned |
 | 4 | Versioned analysis API and service integration | Planned |
@@ -23,5 +25,9 @@ Phase 1D is the latest completed slice. Later phases remain planned.
 | 12 | Advanced analytical modules | Planned |
 | 13 | Production hardening | Planned |
 
-Next task, only after authorization: Phase 1E — quality checks. The remaining engines follow
-incrementally.
+Next task, only after authorization: Phase 1F — production data-quality checks. Scoring,
+recommendations, repair, UI, persistence, reporting, ML, and AI remain later work.
+
+Architecture prerequisite: before persisted quality runs, API-driven cross-session analysis,
+scheduled analysis, or dataset versioning, bind ingestion, semantic, profiling, and quality
+artifacts to one canonical dataset-version/content digest.

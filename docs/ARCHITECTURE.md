@@ -2,8 +2,9 @@
 
 ## Status and boundaries
 
-Phase 1D adds deterministic descriptive profiling after bounded ingestion and semantic type
-inference. It remains a reusable engine rather than a deployed analytics service.
+Phase 1E adds a deterministic quality-check framework after bounded ingestion, semantic type
+inference, and descriptive profiling. It remains a reusable engine rather than a deployed
+analytics service.
 
 ```text
 apps/streamlit/app.py  (static presentation shell)
@@ -14,6 +15,7 @@ haralens.domain (immutable typed metadata and infrastructure Protocols)
 haralens.ingestion (typed contracts → bounded format adapters → pandas DataFrame)
 haralens.semantic (physical dtype + explainable rules → versioned semantic profile)
 haralens.profiling (table + semantic profile → versioned descriptive profile)
+haralens.quality (trusted artifacts → explicit registry → neutral check results)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```
@@ -73,6 +75,22 @@ unresolved; infinities are counted outside finite aggregates; identifier and fre
 values are not retained. Operational failures use typed warnings and do not become data-
 quality judgments. See [profiling](PROFILING.md).
 
+`haralens.quality` validates that the table, semantic profile, and dataset profile remain
+consistent, then executes explicitly registered checks by stable ID. Typed definitions keep
+methodology version, dimension, scope, semantic support, prerequisites, and enablement with the
+check. Execution status is separate from pass/fail outcome; structured findings contain
+severity and reconstructable affected-population evidence. Expected limitations are isolated,
+while software faults become safe execution errors. The runner returns immutable JSON-safe
+results with canonical configuration, registry, run, and finding fingerprints. It computes
+neutral status counts only. See [quality framework](QUALITY_FRAMEWORK.md).
+
+Each quality check receives a separate pandas copy-on-write table snapshot. Normal read-only
+checks share data blocks, while a check's DataFrame API writes detach from both the caller and
+later checks. Before any quality result is persisted, reused across an API session, scheduled,
+or attached to dataset versioning, ingestion, semantic, profiling, and quality artifacts must
+share a canonical dataset-version/content digest. Current in-memory structural checks are not
+a substitute for that lineage binding.
+
 ## Configuration and operation
 
 Settings load defaults, optional `.env`, then `HARALENS_` environment overrides.
@@ -81,6 +99,10 @@ Semantic thresholds live in the strict, immutable `SemanticInferenceConfig` pass
 to the reusable service, so identical table/configuration/version inputs remain reproducible.
 Profiling resource limits and statistical conventions live in the strict, immutable
 `ProfilingConfig`; the complete configuration and both engine versions accompany each result.
+Quality execution uses strict `QualityFrameworkConfig` and explicit `QualityResourceLimits`.
+Future production checks own typed parameter validation and enforce algorithm-specific scan
+budgets. Phase 1E contains no production-check catalogue, thresholds, health score, grade,
+recommendation, or data mutation.
 Settings are created at the composition root rather than as a global singleton.
 Logging starts in FastAPI lifespan; imports do not configure root logging.
 Application logs are UTC JSON events. Third-party server logs keep their own format.
@@ -97,6 +119,8 @@ needed until dependencies exist. Only this public, data-free API route exists.
 - Application services coordinate domain engines and injected infrastructure ports.
 - PostgreSQL migrations and Supabase adapters arrive in Phase 3, with tenant tests.
 - Preserve originals, version datasets, and scope persisted resources by ownership.
+- Bind every persisted or cross-session analysis artifact to one canonical dataset content
+  digest before adding those workflows.
 - Compute deterministic results before rules and optional LLM interpretation.
 - Ollama will be optional and receive aggregate findings by default.
 - Resource-aware engines must bound file size, memory, sampling and work duration.
@@ -106,12 +130,13 @@ needed until dependencies exist. Only this public, data-free API route exists.
 ## Validation
 
 Unit tests cover config validation, model invariants, JSON logging, all three ingestion
-adapters, the semantic rule engine, and exact profiling. Golden business tables, conflict
+adapters, the semantic rule engine, exact profiling, and quality framework dispatch. Golden
+business tables, conflict
 cases, threshold boundaries, serialization, deterministic sampling, immutability, numerical
 edge cases, datetime ambiguity, and failure isolation test the semantic and profiling
 contracts. In-memory workbook and Parquet fixtures exercise security and
 boundary cases without Microsoft Excel or network access. Bounded performance tests
-guard against catastrophic ingestion regressions. API tests use FastAPI TestClient.
+guard against catastrophic ingestion regressions and pathological quality dispatch. API tests use FastAPI TestClient.
 Streamlit AppTest executes the page and a rerun. The smoke script starts real HTTP
 servers, polls their health routes, checks the served frontend, and always terminates
 its own processes. CI runs all checks plus container builds.

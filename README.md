@@ -3,7 +3,7 @@
 Intelligent Data Health, Analytics & ML Readiness Platform.
 
 Understand, validate and improve your data before trusting the decisions or models
-built from it. **Phase 1D deterministic dataset and column profiling is implemented.**
+built from it. **Phase 1E's deterministic data-quality check framework is implemented.**
 
 | Capability | Status |
 | --- | --- |
@@ -15,7 +15,8 @@ built from it. **Phase 1D deterministic dataset and column profiling is implemen
 | Bounded macro-free XLSX and flat Parquet ingestion | Implemented — Phase 1B |
 | Explainable semantic type inference | Implemented — Phase 1C |
 | Semantic-aware dataset and column profiling | Implemented — Phase 1D |
-| Quality, scoring and recommendations | Planned |
+| Typed quality-check framework and runner | Implemented — Phase 1E |
+| Production quality checks, scoring and recommendations | Planned |
 | Authentication, persistence, advanced analytics, ML and AI | Planned |
 
 ## Quick start
@@ -61,6 +62,7 @@ not yet call the backend. No uploads, analysis, authentication or persistence ex
 - [Bounded ingestion](docs/INGESTION.md)
 - [Semantic type inference](docs/SEMANTIC_INFERENCE.md)
 - [Dataset and column profiling](docs/PROFILING.md)
+- [Quality-check framework](docs/QUALITY_FRAMEWORK.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Proposed scoring methodology](docs/SCORING_METHODOLOGY.md)
 - [Phase 0 verification report](docs/PHASE_0_REPORT.md)
@@ -69,6 +71,8 @@ not yet call the backend. No uploads, analysis, authentication or persistence ex
 - [Phase 1C verification report](docs/PHASE_1C_REPORT.md)
 - [Phase 1D verification report](docs/PHASE_1D_REPORT.md)
 - [Phase 1D pre-freeze profiling audit](docs/PHASE_1D_PRE_FREEZE_AUDIT.md)
+- [Phase 1E verification report](docs/PHASE_1E_REPORT.md)
+- [Phase 1E pre-freeze framework audit](docs/PHASE_1E_PRE_FREEZE_AUDIT.md)
 - [Security](SECURITY.md)
 
 MIT licensed. Docker foundations need Docker Engine to build and run; local
