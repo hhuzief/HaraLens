@@ -16,7 +16,7 @@ built from it. **Phase 1E's deterministic data-quality check framework is implem
 | Explainable semantic type inference | Implemented — Phase 1C |
 | Semantic-aware dataset and column profiling | Implemented — Phase 1D |
 | Typed quality-check framework and runner | Implemented — Phase 1E |
-| Production quality checks, scoring and recommendations | Planned |
+| Production quality checks, scoring and recommendations | Implemented — v0.1 Gate 1 |
 | Authentication, persistence, advanced analytics, ML and AI | Planned |
 
 ## Quick start
@@ -63,6 +63,11 @@ not yet call the backend. No uploads, analysis, authentication or persistence ex
 - [Semantic type inference](docs/SEMANTIC_INFERENCE.md)
 - [Dataset and column profiling](docs/PROFILING.md)
 - [Quality-check framework](docs/QUALITY_FRAMEWORK.md)
+- [Production quality checks](docs/QUALITY_CHECKS.md)
+- [Health scoring](docs/HEALTH_SCORING.md)
+- [Recommendations](docs/RECOMMENDATIONS.md)
+- [v0.1 release boundary](docs/HARALENS_V0_1_RELEASE.md)
+- [Gate 1 final calibration audit](docs/HARALENS_GATE_1_FINAL_CALIBRATION_REPORT.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Proposed scoring methodology](docs/SCORING_METHODOLOGY.md)
 - [Phase 0 verification report](docs/PHASE_0_REPORT.md)

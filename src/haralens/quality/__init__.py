@@ -1,5 +1,6 @@
 """Public Phase 1E quality-check framework API."""
 
+from haralens.quality.checks import ProductionQualityConfig, create_default_quality_registry
 from haralens.quality.config import (
     QualityCheckConfiguration,
     QualityConfigParameter,
@@ -99,5 +100,7 @@ __all__ = [
     "UnexpectedCheckError",
     "UnknownCheckIdError",
     "QualityCheckRunner",
+    "ProductionQualityConfig",
+    "create_default_quality_registry",
     "validate_quality_context",
 ]

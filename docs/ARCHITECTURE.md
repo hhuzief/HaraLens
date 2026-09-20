@@ -16,6 +16,8 @@ haralens.ingestion (typed contracts → bounded format adapters → pandas DataF
 haralens.semantic (physical dtype + explainable rules → versioned semantic profile)
 haralens.profiling (table + semantic profile → versioned descriptive profile)
 haralens.quality (trusted artifacts → explicit registry → neutral check results)
+haralens.scoring (quality results → explainable methodology scores)
+haralens.recommendations (quality results → safe deterministic actions)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```

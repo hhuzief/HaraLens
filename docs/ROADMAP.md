@@ -1,6 +1,6 @@
 ﻿# Roadmap
 
-Phase 1E is the latest completed slice. Later phases remain planned.
+Gate 1 is the latest completed slice. Later product integration phases remain planned.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -10,8 +10,7 @@ Phase 1E is the latest completed slice. Later phases remain planned.
 | 1C | Explainable semantic type inference | Implemented; see verification report |
 | 1D | Dataset and column profiling | Implemented; see verification report |
 | 1E | Typed data-quality check framework | Implemented; see verification report |
-| 1F | Production data-quality check catalogue | Planned |
-| 1G+ | Scoring and later quality capabilities | Planned |
+| Gate 1 | Production checks, explainable scoring, deterministic recommendations | Implemented |
 | 2 | Professional Streamlit workflows | Planned |
 | 3 | Authentication and SaaS persistence | Planned |
 | 4 | Versioned analysis API and service integration | Planned |
@@ -25,8 +24,7 @@ Phase 1E is the latest completed slice. Later phases remain planned.
 | 12 | Advanced analytical modules | Planned |
 | 13 | Production hardening | Planned |
 
-Next task, only after authorization: Phase 1F — production data-quality checks. Scoring,
-recommendations, repair, UI, persistence, reporting, ML, and AI remain later work.
+Gate 2 product integration, repair, UI, persistence, reporting, ML, and AI remain later work.
 
 Architecture prerequisite: before persisted quality runs, API-driven cross-session analysis,
 scheduled analysis, or dataset versioning, bind ingestion, semantic, profiling, and quality
