@@ -1,0 +1,1 @@
+"""HaraLens Streamlit application."""

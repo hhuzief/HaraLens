@@ -12,3 +12,8 @@ def test_home_renders_and_reruns() -> None:
     app.run()
     assert not app.exception
     assert len(app.title) == 1
+    assert [page["page_name"] for page in app._registered_pages.values()] == [
+        "Home",
+        "Analyze",
+        "Methodology / About",
+    ]

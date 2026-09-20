@@ -55,6 +55,11 @@ select = ["E", "F", "I", "UP", "B", "S"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101"]
+"apps/streamlit/app.py" = ["E501"]
+"src/haralens/analytics/*.py" = ["E501"]
+"src/haralens/readiness/*.py" = ["E501"]
+"src/haralens/insights/*.py" = ["E501"]
+"src/haralens/reporting/*.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

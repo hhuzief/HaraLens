@@ -9,7 +9,7 @@ built from it. **Phase 1E's deterministic data-quality check framework is implem
 | --- | --- |
 | Package, configuration, JSON application logging | Implemented |
 | Typed metadata models and infrastructure contracts | Implemented |
-| FastAPI liveness endpoint and minimal Streamlit shell | Implemented |
+| FastAPI liveness endpoint and Streamlit product workflow | Implemented — Gate 2 |
 | Tests, checks, CI definition, Docker foundations | Implemented |
 | Bounded UTF-8 CSV ingestion through a reusable contract | Implemented — Phase 1A |
 | Bounded macro-free XLSX and flat Parquet ingestion | Implemented — Phase 1B |
@@ -17,7 +17,8 @@ built from it. **Phase 1E's deterministic data-quality check framework is implem
 | Semantic-aware dataset and column profiling | Implemented — Phase 1D |
 | Typed quality-check framework and runner | Implemented — Phase 1E |
 | Production quality checks, scoring and recommendations | Implemented — v0.1 Gate 1 |
-| Authentication, persistence, advanced analytics, ML and AI | Planned |
+| Advanced analytics, AI-readiness, deterministic insights and report export | Implemented — Gate 3 |
+| Authentication, persistence, model training and hosted AI | Planned |
 
 ## Quick start
 
@@ -53,9 +54,9 @@ containers, configuration, and pre-commit setup.
 
 ## Architecture and scope
 
-Streamlit → FastAPI → application services → engines → storage adapters.
-Phase 0 provides the two entry points and domain boundaries. The static UI does
-not yet call the backend. No uploads, analysis, authentication or persistence exist.
+Streamlit → installable application services → ingestion, semantic, profiling, quality,
+analytics, readiness and reporting engines. FastAPI remains a health-capable foundation.
+The anonymous workflow uses session-scoped state and does not require a database.
 
 - [Product specification](docs/PRODUCT_SPEC.md): full future scope, not current features.
 - [Architecture](docs/ARCHITECTURE.md)
@@ -68,6 +69,12 @@ not yet call the backend. No uploads, analysis, authentication or persistence ex
 - [Recommendations](docs/RECOMMENDATIONS.md)
 - [v0.1 release boundary](docs/HARALENS_V0_1_RELEASE.md)
 - [Gate 1 final calibration audit](docs/HARALENS_GATE_1_FINAL_CALIBRATION_REPORT.md)
+- [Gate 2 product workflow](docs/GATE_2_PRODUCT_WORKFLOW.md)
+- [Gate 2 verification report](docs/GATE_2_VERIFICATION_REPORT.md)
+- [Gate 3 advanced intelligence report](docs/GATE_3_ADVANCED_INTELLIGENCE_REPORT.md)
+- [Release candidate](docs/HARALENS_V0_1_RELEASE_CANDIDATE.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Proposed scoring methodology](docs/SCORING_METHODOLOGY.md)
 - [Phase 0 verification report](docs/PHASE_0_REPORT.md)

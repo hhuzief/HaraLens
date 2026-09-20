@@ -4,6 +4,9 @@ Gate 1 provides deterministic production quality checks, explainable methodology
 traceable recommendations for an uploaded tabular dataset. It evaluates data against configured
 HaraLens rules; it does not guarantee clean data, universal statistical validity, or ML readiness.
 
+Gate 2 provides the session-scoped Streamlit workflow for uploading supported files and viewing
+those engine results. It does not add persistence, authentication, reporting, or automatic cleaning.
+
 The engine is independent of Streamlit, FastAPI, persistence, authentication, connectors, AI,
 and automatic cleaning. Gate 2 integration should use the public imports:
 

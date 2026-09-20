@@ -18,6 +18,7 @@ haralens.profiling (table + semantic profile → versioned descriptive profile)
 haralens.quality (trusted artifacts → explicit registry → neutral check results)
 haralens.scoring (quality results → explainable methodology scores)
 haralens.recommendations (quality results → safe deterministic actions)
+haralens.application (uploaded bytes → ingestion → semantic inference → profiling → quality → scoring → recommendations)
           ↓ future adapter implementations
 PostgreSQL / Supabase authentication / object storage
 ```

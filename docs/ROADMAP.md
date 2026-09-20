@@ -1,6 +1,6 @@
 ﻿# Roadmap
 
-Gate 1 is the latest completed slice. Later product integration phases remain planned.
+Gate 2 is the latest completed slice. Later product integration phases remain planned.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -11,6 +11,7 @@ Gate 1 is the latest completed slice. Later product integration phases remain pl
 | 1D | Dataset and column profiling | Implemented; see verification report |
 | 1E | Typed data-quality check framework | Implemented; see verification report |
 | Gate 1 | Production checks, explainable scoring, deterministic recommendations | Implemented |
+| Gate 2 | Working Streamlit upload and results workflow | Implemented |
 | 2 | Professional Streamlit workflows | Planned |
 | 3 | Authentication and SaaS persistence | Planned |
 | 4 | Versioned analysis API and service integration | Planned |
