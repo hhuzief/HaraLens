@@ -6,13 +6,15 @@ from typing import Any
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from haralens import __version__
 from haralens.application import AnalysisResult, analyze_uploaded_dataset
 from haralens.ingestion import IngestionError, WorksheetSelectionRequiredError
 from haralens.quality import Severity
-from haralens.readiness import assess_readiness
 from haralens.reporting import build_html_report, safe_report_filename
+from haralens.visualization import dashboard, prepare
+from haralens.visualization.theme import page_header
 
 st.set_page_config(page_title="HaraLens", page_icon="◈", layout="wide")
 
@@ -139,70 +141,17 @@ def _run_analysis(uploaded: Any, worksheet: str | None) -> None:
     st.rerun()
 
 
-def _render_results(result: AnalysisResult) -> None:
-    st.download_button(
-        "Download HTML report",
-        data=build_html_report(result),
-        file_name=safe_report_filename(result.source_name),
-        mime="text/html",
-    )
-
-
 def _render_readiness(result: AnalysisResult) -> None:
-    st.subheader("AI readiness")
-    st.caption(
-        "A technical preparation signal, separate from the Data Health Score; it is not a promise of model performance."
-    )
-    st.metric("AI Readiness Score", f"{result.readiness.overall_score:.1f} / 100")
-    st.write(result.readiness.band.value.replace("_", " ").title())
-    st.dataframe(
-        pd.DataFrame(
-            [
-                {
-                    "Dimension": item.name.replace("_", " ").title(),
-                    "Score": item.score,
-                    "Measurement": item.measurement,
-                }
-                for item in result.readiness.dimensions
-            ]
-        ),
-        use_container_width=True,
-        hide_index=True,
-    )
-    if result.readiness.blockers:
-        st.warning("Preparation blockers: " + "; ".join(result.readiness.blockers))
-    if result.readiness.target:
-        st.markdown(f"### Target: {result.readiness.target.target_name}")
-        st.write(result.readiness.target.target_kind.replace("_", " ").title())
-        for observation in result.readiness.target.observations:
-            st.info(observation)
-    target = st.selectbox(
-        "Optional prediction target",
-        ["No target selected", *[item.column_name for item in result.profile.columns]],
-        key="readiness_target",
-    )
-    if target != "No target selected":
-        target_result = assess_readiness(
-            result.ingestion.table,
-            result.semantic,
-            result.profile,
-            result.analytics,
-            target_name=target,
-        )
-        st.markdown(f"### Selected target: {target}")
-        if target_result.target:
-            st.write(target_result.target.target_kind.replace("_", " ").title())
-            for observation in target_result.target.observations:
-                st.info(observation)
+    dashboard.readiness(result)
 
 
 def _render_explore(result: AnalysisResult) -> None:
-    st.subheader("Explore patterns")
+    page_header("Explore", "Inspect distributions, relationships, and missingness in your dataset.")
     distribution_tab, relationship_tab, missingness_tab = st.tabs(
         ["Distributions", "Relationships", "Missingness"]
     )
     numeric = result.analytics.numeric
-    with distribution_tab:
+    with distribution_tab, st.container(border=True):
         if not numeric:
             st.info("No eligible numeric columns are available for numerical exploration.")
         else:
@@ -215,17 +164,24 @@ def _render_explore(result: AnalysisResult) -> None:
             st.write(
                 f"**{selected}** · {next(item.skewness_interpretation for item in numeric if item.column_name == selected)}"
             )
+            dashboard.show(prepare.histogram(result, selected))
             values = (
                 pd.to_numeric(result.ingestion.table[selected], errors="coerce").dropna().head(5000)
             )
-            st.bar_chart(values.reset_index(drop=True), height=240)
+            with st.expander("Values by observation"):
+                st.caption("First 5,000 non-missing observations in source order.")
+                st.bar_chart(values.reset_index(drop=True), height=240)
             if column.statistics and column.statistics.kind == "numeric":
                 st.dataframe(
                     pd.DataFrame([column.statistics.model_dump()]),
                     use_container_width=True,
                     hide_index=True,
                 )
-    with relationship_tab:
+        categories = prepare.categorical_names(result)
+        if categories:
+            category = st.selectbox("Categorical column", categories, key="visual_explore_category")
+            dashboard.show(prepare.frequency(result, category))
+    with relationship_tab, st.container(border=True):
         eligible = [item.column_name for item in numeric]
         if len(eligible) < 2:
             st.info(
@@ -260,44 +216,39 @@ def _render_explore(result: AnalysisResult) -> None:
                 if pair
                 else "Correlation is unavailable for this pair."
             )
-    with missingness_tab:
+            with st.expander("All computed correlations"):
+                st.dataframe(
+                    pd.DataFrame([item.model_dump() for item in result.analytics.correlations]),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+    with missingness_tab, st.container(border=True):
+        dashboard.show(prepare.missingness(result))
         st.dataframe(_missingness_rows(result).head(50), use_container_width=True, hide_index=True)
 
 
 def _render_overview(result: AnalysisResult) -> None:
-    st.subheader("Dataset overview")
-    if result.health.overall_score is None:
-        st.metric("HaraLens Health Score", "Not evaluated")
-    else:
-        st.metric("HaraLens Health Score", f"{result.health.overall_score:.1f} / 100")
-        st.caption(
-            (
-                result.health.interpretation.value
-                if result.health.interpretation
-                else "not evaluated"
-            )
-            .replace("_", " ")
-            .title()
-        )
+    page_header("Overview", "Executive summary of your dataset’s health and AI readiness.")
+    active = dashboard.with_target(result, st.session_state.get("visual_selected_target"))
+    dashboard.pair(prepare.health(result), prepare.readiness(active))
+    dimensions, severity, semantics, missing = prepare.overview_summaries(result)
+    dashboard.pair(dimensions, severity)
+    dashboard.pair(semantics, missing)
     summary = result.profile.summary
     columns = st.columns(4)
     columns[0].metric("Rows", f"{summary.row_count:,}")
     columns[1].metric("Columns", f"{summary.column_count:,}")
     columns[2].metric("Missing cells", f"{summary.missing_cell_count:,}")
     columns[3].metric("Duplicate rows", f"{summary.duplicate_row_count or 0:,}")
-    st.markdown("### Dimension scores")
-    st.dataframe(_dimension_rows(result), use_container_width=True, hide_index=True)
-    st.markdown("### Semantic distribution")
-    st.bar_chart(_semantic_rows(result), x="semantic_type", y="count", height=260)
-    st.markdown("### Missingness by column")
-    missing = _missingness_rows(result)
-    st.dataframe(missing.head(25), use_container_width=True, hide_index=True)
-    if len(missing) > 25:
-        st.caption("Showing the 25 columns with the highest missingness; analysis remains exact.")
+    with st.expander("Profile details"):
+        st.dataframe(_dimension_rows(result), use_container_width=True, hide_index=True)
+        st.dataframe(_missingness_rows(result).head(25), use_container_width=True, hide_index=True)
+        st.caption("Missingness details: up to 25 columns, highest missingness first.")
 
 
 def _render_quality(result: AnalysisResult) -> None:
-    st.subheader("Quality findings")
+    page_header("Data Quality", "Detailed analysis of data quality issues and dimensions.")
+    dashboard.quality(result)
     findings = [
         finding for execution in result.quality.executions for finding in execution.findings
     ]
@@ -345,38 +296,21 @@ def _render_quality(result: AnalysisResult) -> None:
 
 
 def _render_columns(result: AnalysisResult) -> None:
-    st.subheader("Column explorer")
-    names = [column.column_name for column in result.profile.columns]
-    if not names:
+    page_header("Column Analysis", "Detailed analysis for each column in your dataset.")
+    if not result.profile.columns:
         st.info("No columns are available for exploration.")
         return
-    selected = st.selectbox("Select a column", names)
-    column = result.profile.columns[names.index(selected)]
-    st.write(
-        f"**{column.column_name}** · {column.semantic_type.value.replace('_', ' ').title()} · {column.semantic_confidence.value} confidence"
-    )
-    st.dataframe(
-        pd.DataFrame(
-            [
-                {
-                    "Physical dtype": column.physical_dtype,
-                    "Rows": column.total_count,
-                    "Missing": column.null_count,
-                    "Missing %": column.missing_percentage,
-                    "Distinct": column.unique_count,
-                    "Memory bytes": column.memory_bytes,
-                }
-            ]
-        ),
-        use_container_width=True,
-        hide_index=True,
-    )
-    if column.statistics is not None:
-        st.json(column.statistics.model_dump(mode="json"))
+    dashboard.column(result)
+    selected = st.session_state.selected_column
+    column = next(c for c in result.profile.columns if c.column_name == selected)
+    with st.expander("Complete column profile"):
+        st.write(f"Semantic inference confidence: {column.semantic_confidence.value}")
+        st.json(column.model_dump(mode="json"))
 
 
 def _render_recommendations(result: AnalysisResult) -> None:
-    st.subheader("Recommendations")
+    page_header("Recommendations", "Prioritized recommendations to improve your dataset.")
+    dashboard.recommendations(result)
     recommendations = result.recommendations.recommendations
     if not recommendations:
         st.info(
@@ -436,6 +370,9 @@ def _render_error(error: Exception) -> None:
 
 
 def _reset() -> None:
+    for key in list(st.session_state):
+        if str(key).startswith("visual_"):
+            st.session_state.pop(key, None)
     for key in (
         "analysis_result",
         "upload_identity",
@@ -498,6 +435,66 @@ def recommendations_page() -> None:
     _render_recommendations(result) if result is not None else _inactive_result_page()
 
 
+def report_page() -> None:
+    result = st.session_state.get("analysis_result")
+    if result is None:
+        _inactive_result_page()
+        return
+    result = dashboard.with_target(
+        result,
+        st.session_state.get("visual_selected_target", st.session_state.get("readiness_target")),
+    )
+    report = build_html_report(result)
+    page_header(
+        "HaraLens Analysis Report", "Review the complete analysis before exporting your report."
+    )
+    st.caption(f"Dataset: {result.source_name} · HTML report · Session-scoped")
+    st.markdown("### Report Preview")
+    components.html(report, height=1100, scrolling=True)
+    st.markdown("### Export Report")
+    st.download_button(
+        "Download HaraLens Report",
+        data=report,
+        file_name=safe_report_filename(result.source_name),
+        mime="text/html",
+        help="Download the same report shown in the preview.",
+    )
+
+
+def _build_pages(active_result: AnalysisResult | None) -> list[Any]:
+    pages: list[Any] = [
+        st.Page(home, title="Home", icon=":material/home:", default=active_result is None),
+        st.Page(analyze, title="Analyze", icon=":material/upload_file:"),
+    ]
+    if active_result is not None:
+        pages.extend(
+            [
+                st.Page(overview_page, title="Overview", icon=":material/dashboard:", default=True),
+                st.Page(data_quality_page, title="Data Quality", icon=":material/fact_check:"),
+                st.Page(readiness_page, title="AI Readiness", icon=":material/model_training:"),
+                st.Page(explore_page, title="Explore", icon=":material/explore:"),
+                st.Page(columns_page, title="Columns", icon=":material/view_column:"),
+                st.Page(
+                    recommendations_page,
+                    title="Recommendations",
+                    icon=":material/tips_and_updates:",
+                ),
+                st.Page(report_page, title="Report", icon=":material/description:"),
+            ]
+        )
+    pages.append(st.Page(methodology, title="Methodology / About", icon=":material/info:"))
+    return pages
+
+
+st.logo(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="165" height="48" viewBox="0 0 165 48">'
+    '<text x="0" y="24" fill="#f1f5f9" font-family="Arial,sans-serif" '
+    'font-size="24" font-weight="700">HaraLens</text>'
+    '<text x="0" y="44" fill="#b3c4d3" font-family="Arial,sans-serif" font-size="13">v0.1</text>'
+    "</svg>",
+    size="large",
+)
+
 _state()
 active_result = st.session_state.get("analysis_result")
 if active_result is not None:
@@ -507,20 +504,4 @@ if active_result is not None:
         f"{active_result.profile.summary.row_count:,} rows · "
         f"{active_result.profile.summary.column_count:,} columns"
     )
-pages = [
-    st.Page(home, title="Home", default=active_result is None),
-    st.Page(analyze, title="Analyze"),
-]
-if active_result is not None:
-    pages.extend(
-        [
-            st.Page(overview_page, title="Overview", default=True),
-            st.Page(data_quality_page, title="Data Quality"),
-            st.Page(readiness_page, title="AI Readiness"),
-            st.Page(explore_page, title="Explore"),
-            st.Page(columns_page, title="Columns"),
-            st.Page(recommendations_page, title="Recommendations"),
-        ]
-    )
-pages.append(st.Page(methodology, title="Methodology / About"))
-st.navigation(pages, position="sidebar").run()
+st.navigation(_build_pages(active_result), position="sidebar").run()

@@ -36,10 +36,15 @@ def test_target_analysis_is_optional_and_conservative() -> None:
 
 
 def test_report_contains_no_raw_rows() -> None:
-    result = analyze_uploaded_dataset(b"secret,value\nCUSTOMER-123,1\n", "safe.csv")
+    result = analyze_uploaded_dataset(b"secret,value\nCUSTOMER-123,1\n", "unsafe<script>.csv")
     report = build_html_report(result)
     assert "CUSTOMER-123" not in report
+    assert "unsafe&lt;script&gt;.csv" in report
     assert "HaraLens v0.1 report" in report
+    assert "Data Health &amp; AI Readiness Report" in report
+    assert f"{result.readiness.overall_score:.1f} / 100" in report
+    assert "Data-quality findings" in report
+    assert "Recommendations" in report
     assert (
         safe_report_filename("../../customers<script>.csv")
         == "haralens_report_customers_script.html"
